@@ -1,0 +1,12 @@
+[project]
+name = "visual-content-classifier"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi[standard]>=0.136.1",
+    "label-studio>=1.23.0",
+    "torch",
+    "torchvision",
+]
