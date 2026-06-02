@@ -5,8 +5,22 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "albumentations>=2.0.8",
     "fastapi[standard]>=0.136.1",
+    "fiftyone>=1.16.0",
     "label-studio>=1.23.0",
+    "mlflow>=3.12.0",
+    "numpy>=2.4.6",
+    "pandas>=2.3.3",
+    "pillow>=12.2.0",
+    "python-multipart>=0.0.28",
+    "requests>=2.32.5",
+    "scikit-learn>=1.8.0",
+    "sentence-transformers>=5.5.1",
+    "streamlit>=1.58.0",
     "torch",
+    "torchmetrics>=1.9.0",
     "torchvision",
+    "transformers>=5.9.0",
+    "vadersentiment>=3.3.2",
 ]

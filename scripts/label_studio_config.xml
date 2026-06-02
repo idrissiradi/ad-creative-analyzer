@@ -1,0 +1,62 @@
+<!--
+  Label Studio Config — Ad Creative Analyzer PFE
+  Task: Label MOOD for each marketing image
+  (content_type is pre-labeled from Open Images download)
+
+  How to use:
+    1. Start Label Studio:  label-studio start
+    2. Create new project → "Ad Creative Analyzer — Mood Labeling"
+    3. Settings → Labeling Interface → paste this XML
+    4. Import → CSV → data/raw/manifest.csv
+    5. Label all images → Export → CSV → save to data/labeled/mood_labels.csv
+-->
+
+<View>
+
+  <!-- Header with progress context -->
+  <Header value="🎯 Ad Creative Mood Labeling"/>
+  <Text name="context" value="Label the MOOD/TONE of this marketing image. Ignore the product — focus on the feeling and energy the image conveys."/>
+
+  <!-- The image -->
+  <Image name="image" value="$image_path" zoom="true" zoomControl="true"/>
+
+  <!-- Content type display (pre-labeled, read-only) -->
+  <Header value="Content Type (pre-labeled — verify only):"/>
+  <Text name="content_type_display" value="$content_type_name"/>
+
+  <!-- MOOD labeling — main task -->
+  <Header value="Select the MOOD of this image:"/>
+  <Choices name="mood_label" toName="image" choice="single" showInline="false">
+
+    <Choice value="0" alias="Energetic"
+      hint="High energy, dynamic, action-oriented, exciting, bold colors, motion, urgency">
+      ⚡ Energetic
+    </Choice>
+
+    <Choice value="1" alias="Calm"
+      hint="Peaceful, serene, minimal, soft colors, slow-paced, relaxing, quiet">
+      🌿 Calm
+    </Choice>
+
+    <Choice value="2" alias="Professional"
+      hint="Corporate, clean, structured, formal, trustworthy, serious, authoritative">
+      💼 Professional
+    </Choice>
+
+    <Choice value="3" alias="Playful"
+      hint="Fun, colorful, informal, humorous, friendly, youthful, light-hearted">
+      🎉 Playful
+    </Choice>
+
+  </Choices>
+
+  <!-- Optional: content type correction -->
+  <Header value="Content Type (correct if wrong):"/>
+  <Choices name="content_type_label" toName="image" choice="single" showInline="true">
+    <Choice value="0">📦 Product Showcase</Choice>
+    <Choice value="1">🌄 Lifestyle</Choice>
+    <Choice value="2">💬 Testimonial</Choice>
+    <Choice value="3">🏷️ Promotional</Choice>
+  </Choices>
+
+</View>
