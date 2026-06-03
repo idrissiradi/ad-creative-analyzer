@@ -218,3 +218,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Ignore raw data files
+data/raw/
+data/raw/manifest*.csv
+
+# Ignore labeled data (keep this local until you are ready to share)
+data/labeled/
+
+# Ignore dataset splits (optional, but good practice)
+data/splits/

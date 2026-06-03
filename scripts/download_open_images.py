@@ -1,43 +1,55 @@
 import argparse
-import os
 import shutil
 from pathlib import Path
 
-import fiftyone as fo
 import fiftyone.zoo as foz
 import pandas as pd
 from tqdm import tqdm
-
-DOWNLOAD_PLAN = [
-    # Content Type 0 — Product Showcase (375)
-    ("Coffee cup", 0, 80),
-    ("Cosmetics", 0, 80),
-    ("Clothing", 0, 80),
-    ("Footwear", 0, 75),
-    ("Mobile phone", 0, 60),
-    # Content Type 1 — Lifestyle (375)
-    ("Hiking equipment", 1, 70),
-    ("Sports equipment", 1, 70),
-    ("Yoga", 1, 70),
-    ("Cooking", 1, 75),
-    ("Swimming", 1, 90),
-    # Content Type 2 — Testimonial (375)
-    ("Man", 2, 130),
-    ("Woman", 2, 130),
-    ("Smile", 2, 115),
-    # Content Type 3 — Promotional (375)
-    ("Sale sign", 3, 80),
-    ("Billboard", 3, 80),
-    ("Poster", 3, 80),
-    ("Banner", 3, 80),
-    ("Gift wrapping", 3, 55),
-]
 
 CONTENT_TYPE_NAMES = [
     "Product Showcase",
     "Lifestyle",
     "Testimonial",
     "Promotional",
+]
+
+DOWNLOAD_PLAN = [
+    # ── Content Type 0 — Product Showcase
+    ("Clothing", 0, 100),
+    ("Footwear", 0, 74),
+    ("Mobile phone", 0, 60),
+    ("Handbag", 0, 60),
+    ("Laptop", 0, 50),
+    ("Watch", 0, 50),
+    ("Camera", 0, 40),
+    ("Coffee cup", 0, 15),
+    ("Perfume", 0, 10),
+    ("Cosmetics", 0, 1),
+    # ── Content Type 1 — Lifestyle
+    ("Bicycle", 1, 80),
+    ("Sports equipment", 1, 70),
+    ("Skateboard", 1, 60),
+    ("Tent", 1, 50),
+    ("Dumbbell", 1, 50),
+    ("Swimming pool", 1, 30),
+    ("Surfboard", 1, 25),
+    ("Hiking equipment", 1, 20),
+    # ── Content Type 2 — Testimonial
+    ("Human face", 2, 150),
+    ("Man", 2, 130),
+    ("Woman", 2, 130),
+    ("Suit", 2, 92),
+    ("Microphone", 2, 49),
+    # ── Content Type 3 — Promotional
+    ("Cocktail", 3, 80),
+    ("Candle", 3, 70),
+    ("Beer", 3, 60),
+    ("Pizza", 3, 50),
+    ("Fast food", 3, 50),
+    ("Billboard", 3, 51),
+    ("Poster", 3, 37),
+    ("Balloon", 3, 16),
+    ("Cake", 3, 9),
 ]
 
 
@@ -100,7 +112,7 @@ def download_with_fiftyone(plan: list, output_dir: str, split: str = "train"):
             )
 
         # Cleanup fiftyone dataset from memory
-        fo.delete_dataset(dataset.name)
+        dataset.delete()
 
     df = pd.DataFrame(records).drop_duplicates(subset=["image_path"])
     manifest_path = Path(output_dir) / "manifest.csv"
