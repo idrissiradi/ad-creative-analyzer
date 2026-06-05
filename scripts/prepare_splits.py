@@ -1,19 +1,3 @@
-"""
-prepare_splits.py — Generate train/val/test CSVs from labeled manifest.
-
-Run this AFTER:
-  1. download_open_images.py  → data/raw/manifest.csv (content_type labeled)
-  2. Label Studio export      → data/labeled/mood_labels.csv (mood labeled)
-
-Usage:
-  uv run python scripts/prepare_splits.py
-
-Output:
-  data/splits/train.csv  (70%)
-  data/splits/val.csv    (15%)
-  data/splits/test.csv   (15%)
-"""
-
 import os
 from pathlib import Path
 
@@ -21,50 +5,36 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 SPLITS_DIR = Path("data/splits")
-RAW_DIR = Path("data/raw")
 LABELED_DIR = Path("data/labeled")
 
 
-def load_and_merge() -> pd.DataFrame:
+def load_data() -> pd.DataFrame:
     """
-    Merge content_type labels (from OI download) with mood labels (from Label Studio).
+    Load labels.csv and change content_type and mood from string to int labels.
+    - content_type: Product Showcase=0, Lifestyle=1, Testimonial=2, Promotional=3
+    - mood: Calm=0, Happy=1, Energetic=2, Sad=3, Angry=4
     """
-    manifest_path = RAW_DIR / "manifest.csv"
-    if not manifest_path.exists():
+    labeled_path = LABELED_DIR / "labels.csv"
+    if not labeled_path.exists():
         raise FileNotFoundError(
-            "data/raw/manifest.csv not found.\n"
+            "data/labeled/labels.csv not found.\n"
             "Run: uv run python scripts/download_open_images.py"
         )
 
-    df = pd.read_csv(manifest_path)
-    print(f"Manifest loaded: {len(df)} images")
+    df = pd.read_csv(labeled_path)
+    print(f"Labels loaded: {len(df)} images")
+    # Map content_type to int labels
+    content_type_mapping = {
+        "Product Showcase": 0,
+        "Lifestyle": 1,
+        "Testimonial": 2,
+        "Promotional": 3,
+    }
+    df["content_type_label"] = df["content_type"].map(content_type_mapping)
 
-    # Check if mood labels exist (from Label Studio export)
-    mood_path = LABELED_DIR / "mood_labels.csv"
-    if mood_path.exists():
-        mood_df = pd.read_csv(mood_path)
-        # mood_labels.csv must have columns: image_path, mood_label
-        df = df.merge(
-            mood_df[["image_path", "mood_label"]],
-            on="image_path",
-            how="left",
-            suffixes=("_raw", ""),
-        )
-        # If mood_label exists in both, use the new one
-        if "mood_label_raw" in df.columns:
-            df["mood_label"] = df["mood_label"].fillna(df["mood_label_raw"])
-            df.drop(columns=["mood_label_raw"], inplace=True)
-        print(f"Mood labels merged from: {mood_path}")
-    else:
-        print("⚠  mood_labels.csv not found — mood_label will be -1 (unlabeled)")
-        print("   Label moods in Label Studio and re-run this script.")
-
-    # Drop rows with missing labels
-    before = len(df)
-    df = df[df["mood_label"] != -1].copy()
-    after = len(df)
-    if before != after:
-        print(f"   Dropped {before - after} unlabeled rows (mood_label = -1)")
+    # Map mood to int labels, -1 for unlabeled
+    mood_mapping = {"Calm": 0, "Happy": 1, "Energetic": 2, "Sad": 3, "Angry": 4}
+    df["mood_label"] = df["mood"].map(mood_mapping)
 
     return df
 
@@ -117,11 +87,11 @@ def main():
     print("Prepare Train/Val/Test Splits")
     print("=" * 60)
 
-    df = load_and_merge()
+    df = load_data()
 
     if len(df) < 100:
         print(f"\n⚠  Only {len(df)} labeled images. Need at least 100 to split.")
-        print("   Complete labeling in Label Studio first.")
+        print("   Complete Qwen auto-labeling on Colab first.")
         return
 
     train_df, val_df, test_df = stratified_split(df)

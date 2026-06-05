@@ -12,44 +12,64 @@ CONTENT_TYPE_NAMES = [
     "Testimonial",
     "Promotional",
 ]
-
 DOWNLOAD_PLAN = [
     # ── Content Type 0 — Product Showcase
-    ("Clothing", 0, 100),
-    ("Footwear", 0, 74),
-    ("Mobile phone", 0, 60),
-    ("Handbag", 0, 60),
-    ("Laptop", 0, 50),
-    ("Watch", 0, 50),
-    ("Camera", 0, 40),
-    ("Coffee cup", 0, 15),
-    ("Perfume", 0, 10),
-    ("Cosmetics", 0, 1),
+    ("Clothing", 0, 150),
+    ("Footwear", 0, 100),
+    ("Mobile phone", 0, 100),
+    ("Handbag", 0, 100),
+    ("Laptop", 0, 100),
+    ("Watch", 0, 80),
+    ("Camera", 0, 80),
+    ("Coffee cup", 0, 80),
+    ("Perfume", 0, 80),
+    ("Cosmetics", 0, 80),
+    ("Headphones", 0, 80),
+    ("Sunglasses", 0, 80),
+    ("Backpack", 0, 80),
+    ("Water bottle", 0, 80),
+    ("Smartwatch", 0, 80),
     # ── Content Type 1 — Lifestyle
-    ("Bicycle", 1, 80),
-    ("Sports equipment", 1, 70),
-    ("Skateboard", 1, 60),
-    ("Tent", 1, 50),
-    ("Dumbbell", 1, 50),
-    ("Swimming pool", 1, 30),
-    ("Surfboard", 1, 25),
-    ("Hiking equipment", 1, 20),
+    ("Bicycle", 1, 100),
+    ("Sports equipment", 1, 100),
+    ("Skateboard", 1, 80),
+    ("Tent", 1, 80),
+    ("Dumbbell", 1, 80),
+    ("Swimming pool", 1, 80),
+    ("Surfboard", 1, 80),
+    ("Hiking equipment", 1, 80),
+    ("Yoga mat", 1, 80),
+    ("Campfire", 1, 80),
+    ("Kayak", 1, 80),
+    ("Dog", 1, 100),
+    ("Coffee shop", 1, 80),
     # ── Content Type 2 — Testimonial
-    ("Human face", 2, 150),
-    ("Man", 2, 130),
-    ("Woman", 2, 130),
-    ("Suit", 2, 92),
-    ("Microphone", 2, 49),
-    # ── Content Type 3 — Promotional
-    ("Cocktail", 3, 80),
-    ("Candle", 3, 70),
-    ("Beer", 3, 60),
-    ("Pizza", 3, 50),
-    ("Fast food", 3, 50),
-    ("Billboard", 3, 51),
-    ("Poster", 3, 37),
-    ("Balloon", 3, 16),
-    ("Cake", 3, 9),
+    ("Human face", 2, 200),
+    ("Man", 2, 150),
+    ("Woman", 2, 150),
+    ("Suit", 2, 120),
+    ("Microphone", 2, 80),
+    ("Podium", 2, 80),
+    ("Award", 2, 80),
+    ("Handshake", 2, 80),
+    ("Group of people", 2, 100),
+    ("Interview", 2, 80),
+    # ─ Content Type 3 — Promotional
+    ("Cocktail", 3, 100),
+    ("Candle", 3, 100),
+    ("Beer", 3, 100),
+    ("Pizza", 3, 100),
+    ("Fast food", 3, 100),
+    ("Billboard", 3, 100),
+    ("Poster", 3, 80),
+    ("Balloon", 3, 80),
+    ("Cake", 3, 80),
+    ("Neon sign", 3, 80),
+    ("Flyer", 3, 80),
+    ("Discount tag", 3, 80),
+    ("Event stage", 3, 80),
+    ("Confetti", 3, 80),
+    ("Gift box", 3, 80),
 ]
 
 
@@ -94,9 +114,12 @@ def download_with_fiftyone(plan: list, output_dir: str, split: str = "train"):
             dst_path = output_path / dst_name
 
             try:
-                shutil.copy2(src, dst_path)
+                if not dst_path.exists():
+                    shutil.copy2(src, dst_path)
+                else:
+                    print(f"Skipping {dst_path.name}, already exists.")
             except Exception as copy_err:
-                print(f"  ⚠ Failed to copy {src}: {copy_err}")
+                print(f"Failed to copy {src}: {copy_err}")
                 continue
 
             seen_img_ids.add(img_id)
