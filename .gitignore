@@ -226,3 +226,6 @@ data/raw/*
 *.db
 mlruns/*
 checkpoints/*
+*.pt
+*.pth
+*.onnx
