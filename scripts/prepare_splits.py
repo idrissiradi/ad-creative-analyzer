@@ -7,6 +7,22 @@ from sklearn.model_selection import train_test_split
 SPLITS_DIR = Path("data/splits")
 LABELED_DIR = Path("data/labeled")
 
+MOOD_MAP = {
+    "Energetic": 0,
+    "Calm": 1,
+    "Professional": 2,
+    "Playful": 3,
+}
+
+CONTENT_TYPE_MAP = {
+    "Product Showcase": 0,
+    "Lifestyle": 1,
+    "Promotional": 2,
+}
+
+CONTENT_TYPE_NAMES = ["Product Showcase", "Lifestyle", "Promotional"]
+MOOD_NAMES = ["Energetic", "Calm", "Professional", "Playful"]
+
 
 def load_data() -> pd.DataFrame:
     """
@@ -16,26 +32,20 @@ def load_data() -> pd.DataFrame:
     """
     labeled_path = LABELED_DIR / "labels.csv"
     if not labeled_path.exists():
-        raise FileNotFoundError(
-            "data/labeled/labels.csv not found.\n"
-            "Run: uv run python scripts/download_open_images.py"
-        )
+        raise FileNotFoundError("data/labeled/labels.csv not found.")
 
     df = pd.read_csv(labeled_path)
     print(f"Labels loaded: {len(df)} images")
-    # Map content_type to int labels
-    content_type_mapping = {
-        "Product Showcase": 0,
-        "Lifestyle": 1,
-        "Testimonial": 2,
-        "Promotional": 3,
-    }
-    df["content_type_label"] = df["content_type"].map(content_type_mapping)
+    print(f"Columns: {list(df.columns)}")
 
-    # Map mood to int labels, -1 for unlabeled
-    mood_mapping = {"Calm": 0, "Happy": 1, "Energetic": 2, "Sad": 3, "Angry": 4}
-    df["mood_label"] = df["mood"].map(mood_mapping)
+    if "image_name" in df.columns:
+        df = df.rename(columns={"image_name": "image_path"})
 
+    df["content_type_label"] = df["content_type"].map(CONTENT_TYPE_MAP)
+    df["mood_label"] = df["mood"].map(MOOD_MAP)
+
+    df = df[["image_path", "content_type_label", "mood_label"]].copy()
+    df = df.reset_index(drop=True)
     return df
 
 
@@ -64,6 +74,7 @@ def stratified_split(df: pd.DataFrame) -> tuple:
 
 
 def save_splits(train_df, val_df, test_df):
+    """Save the splits to CSV files in data/splits/ directory."""
     SPLITS_DIR.mkdir(parents=True, exist_ok=True)
 
     train_df.to_csv(SPLITS_DIR / "train.csv", index=False)
@@ -76,10 +87,10 @@ def save_splits(train_df, val_df, test_df):
     print(f"   test  : {len(test_df)} samples")
 
     print("\n   Content type distribution in train:")
-    ct_names = ["Product Showcase", "Lifestyle", "Testimonial", "Promotional"]
-    for i, name in enumerate(ct_names):
+
+    for i, name in enumerate(CONTENT_TYPE_NAMES):
         count = (train_df["content_type_label"] == i).sum()
-        print(f"     {name}: {count}")
+        print(f"{name}: {count}")
 
 
 def main():
@@ -91,7 +102,6 @@ def main():
 
     if len(df) < 100:
         print(f"\n⚠  Only {len(df)} labeled images. Need at least 100 to split.")
-        print("   Complete Qwen auto-labeling on Colab first.")
         return
 
     train_df, val_df, test_df = stratified_split(df)

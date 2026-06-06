@@ -221,10 +221,6 @@ __marimo__/
 
 # Ignore raw data files
 data/raw/
-data/raw/manifest*.csv
+data/raw/*
 
-# Ignore labeled data (keep this local until you are ready to share)
-data/labeled/
 
-# Ignore dataset splits (optional, but good practice)
-data/splits/
