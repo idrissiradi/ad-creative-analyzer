@@ -6,9 +6,6 @@ from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
 
-CONTENT_TYPES = ["Product Showcase", "Lifestyle", "Testimonial", "Promotional"]
-MOODS = ["Energetic", "Calm", "Professional", "Playful"]
-
 
 def get_transforms(split: str = "train"):
     if split == "train":

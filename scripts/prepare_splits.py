@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 import pandas as pd
@@ -90,6 +89,10 @@ def save_splits(train_df, val_df, test_df):
 
     for i, name in enumerate(CONTENT_TYPE_NAMES):
         count = (train_df["content_type_label"] == i).sum()
+        print(f"{name}: {count}")
+
+    for i, name in enumerate(MOOD_NAMES):
+        count = (train_df["mood_label"] == i).sum()
         print(f"{name}: {count}")
 
 
