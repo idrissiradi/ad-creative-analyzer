@@ -223,4 +223,6 @@ __marimo__/
 data/raw/
 data/raw/*
 
-
+*.db
+mlruns/*
+checkpoints/*
