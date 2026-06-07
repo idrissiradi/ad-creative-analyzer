@@ -9,8 +9,8 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from torchmetrics.classification import MulticlassF1Score
 
-from dataset import AdImageDataset
-from image_model import AdImageModel
+from src.dataset import AdImageDataset
+from src.image_model import AdImageModel
 
 NUM_CONTENT = 3
 NUM_MOODS = 4
@@ -162,10 +162,10 @@ def main(args):
     )
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs)
 
-    best_f1 = 0.0
-    ckpt_path = os.path.join(save_dir, f"best_phase{args.phase}.pt")
-
     # Training loop
+    best_f1 = 0.0
+    checkpoint_path = os.path.join(save_dir, f"best_phase{args.phase}.pt")
+
     with mlflow.start_run(run_name=f"phase{args.phase}_e{args.epochs}"):
         mlflow.log_params(
             {
@@ -203,17 +203,18 @@ def main(args):
                 f"Epoch {epoch:02d}/{args.epochs} | "
                 f"loss={loss:.4f} | "
                 f"F1_content={f1_content:.4f} | "
-                f"F1_mood={f1_mood:.4f}"
+                f"F1_mood={f1_mood:.4f} / "
+                f"Avg_F1={avg_f1:.4f}"
             )
 
             if avg_f1 > best_f1:
                 best_f1 = avg_f1
-                torch.save(model.state_dict(), ckpt_path)
+                torch.save(model.state_dict(), checkpoint_path)
                 mlflow.pytorch.log_model(model, f"model_phase{args.phase}")  # type: ignore
-                print(f"  ✓ Checkpoint saved (avg_F1={avg_f1:.4f})")
+                print(f"    Checkpoint saved (avg_F1={avg_f1:.4f})")
 
-    print(f"\n✅ Phase {args.phase} done. Best avg F1 = {best_f1:.4f}")
-    return ckpt_path
+    print(f"\nPhase {args.phase} done. Best avg F1 = {best_f1:.4f}")
+    return checkpoint_path
 
 
 if __name__ == "__main__":
