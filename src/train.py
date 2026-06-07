@@ -113,12 +113,12 @@ def main(args):
     ).to(device)
 
     if args.phase == 2 and getattr(args, "checkpoint", None):
-        print(f"Loading Phase 1 checkpoint: {args.checkpoint}")
+        print("  Loading Phase 1 checkpoint")
         model.load_state_dict(
             torch.load(args.checkpoint, map_location=device, weights_only=True)
         )
         model.unfreeze_last_blocks(num_blocks=3)
-        print("Unfroze last 3 encoder blocks")
+        print("  Unfroze last 3 encoder blocks")
 
     # Data setup
     img_dir = getattr(args, "img_dir", "data/raw")
@@ -195,6 +195,7 @@ def main(args):
                     "train_mood_accuracy": mood_acc,
                     "val_f1_content": f1_content,
                     "val_f1_mood": f1_mood,
+                    "val_avg_f1": avg_f1,
                 },
                 step=epoch,
             )
@@ -203,7 +204,7 @@ def main(args):
                 f"Epoch {epoch:02d}/{args.epochs} | "
                 f"loss={loss:.4f} | "
                 f"F1_content={f1_content:.4f} | "
-                f"F1_mood={f1_mood:.4f} / "
+                f"F1_mood={f1_mood:.4f} | "
                 f"Avg_F1={avg_f1:.4f}"
             )
 
