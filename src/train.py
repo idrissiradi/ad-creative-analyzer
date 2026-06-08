@@ -1,4 +1,3 @@
-import argparse
 import os
 
 import mlflow
@@ -101,31 +100,38 @@ def eval_epoch(model, loader, device):
     return f1_ct.compute().item(), f1_mood.compute().item()
 
 
-def main(args):
-    device = get_device(getattr(args, "device", "auto"))
-    save_dir = getattr(args, "save_dir", "checkpoints")
+def train_model(
+    phase: int = 1,
+    epochs: int = 10,
+    batch_size: int = 16,
+    lr: float = 1e-4,
+    img_dir: str = "data/raw",
+    train_csv: str = "data/splits/train.csv",
+    val_csv: str = "data/splits/val.csv",
+    checkpoint: str | None = None,
+    save_dir: str = "checkpoints",
+    device: str = "auto",
+):
+    """Main training function for VisioMark Dual-Head EfficientNet."""
+    device = get_device(device)
     os.makedirs(save_dir, exist_ok=True)
 
     # Model setup
-    freeze = args.phase == 1
+    freeze = phase == 1  # Freeze encoder in Phase 1, unfreeze in Phase 2
+
     model = AdImageModel(
         num_content_types=NUM_CONTENT, num_moods=NUM_MOODS, freeze_encoder=freeze
     ).to(device)
 
-    if args.phase == 2 and getattr(args, "checkpoint", None):
+    if phase == 2 and checkpoint is not None:
         print("  Loading Phase 1 checkpoint")
         model.load_state_dict(
-            torch.load(args.checkpoint, map_location=device, weights_only=True)
+            torch.load(checkpoint, map_location=device, weights_only=True)
         )
         model.unfreeze_last_blocks(num_blocks=3)
         print("  Unfroze last 3 encoder blocks")
 
     # Data setup
-    img_dir = getattr(args, "img_dir", "data/raw")
-    train_csv = getattr(args, "train_csv", "data/splits/train.csv")
-    val_csv = getattr(args, "val_csv", "data/splits/val.csv")
-    batch_size = getattr(args, "batch_size", 16)
-
     train_ds = AdImageDataset(csv_path=train_csv, img_dir=img_dir, split="train")
     val_ds = AdImageDataset(csv_path=val_csv, img_dir=img_dir, split="val")
 
@@ -153,24 +159,22 @@ def main(args):
     content_criterion = nn.CrossEntropyLoss(weight=content_weights)
     mood_criterion = nn.CrossEntropyLoss(weight=mood_weights)
 
-    lr = getattr(args, "lr", 1e-4)
-
     optimizer = torch.optim.AdamW(
         filter(lambda p: p.requires_grad, model.parameters()),
         lr=lr,
         weight_decay=1e-4,
     )
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
     # Training loop
     best_f1 = 0.0
-    checkpoint_path = os.path.join(save_dir, f"best_phase{args.phase}.pt")
+    checkpoint_path = os.path.join(save_dir, f"best_phase{phase}.pt")
 
-    with mlflow.start_run(run_name=f"phase{args.phase}_e{args.epochs}"):
+    with mlflow.start_run(run_name=f"phase{phase}_e{epochs}"):
         mlflow.log_params(
             {
-                "phase": args.phase,
-                "epochs": args.epochs,
+                "phase": phase,
+                "epochs": epochs,
                 "lr": lr,
                 "batch_size": batch_size,
                 "device": device,
@@ -180,7 +184,7 @@ def main(args):
             }
         )
 
-        for epoch in range(1, args.epochs + 1):
+        for epoch in range(1, epochs + 1):
             loss, content_acc, mood_acc = train_epoch(
                 model, train_dl, optimizer, content_criterion, mood_criterion, device
             )
@@ -201,7 +205,7 @@ def main(args):
             )
 
             print(
-                f"Epoch {epoch:02d}/{args.epochs} | "
+                f"Epoch {epoch:02d}/{epochs} | "
                 f"loss={loss:.4f} | "
                 f"F1_content={f1_content:.4f} | "
                 f"F1_mood={f1_mood:.4f} | "
@@ -211,23 +215,8 @@ def main(args):
             if avg_f1 > best_f1:
                 best_f1 = avg_f1
                 torch.save(model.state_dict(), checkpoint_path)
-                mlflow.pytorch.log_model(model, f"model_phase{args.phase}")  # type: ignore
+                mlflow.pytorch.log_model(model, f"model_phase{phase}")  # type: ignore
                 print(f"    Checkpoint saved (avg_F1={avg_f1:.4f})")
 
-    print(f"\nPhase {args.phase} done. Best avg F1 = {best_f1:.4f}")
+    print(f"\nPhase {phase} done. Best avg F1 = {best_f1:.4f}")
     return checkpoint_path
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--phase", type=int, default=1, choices=[1, 2])
-    parser.add_argument("--epochs", type=int, default=10)
-    parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--lr", type=float, default=1e-4)
-    parser.add_argument("--img_dir", type=str, default="data/raw")
-    parser.add_argument("--train_csv", type=str, default="data/splits/train.csv")
-    parser.add_argument("--val_csv", type=str, default="data/splits/val.csv")
-    parser.add_argument("--checkpoint", type=str, default=None)
-    parser.add_argument("--save_dir", type=str, default="checkpoints")
-    parser.add_argument("--device", type=str, default="auto")
-    main(parser.parse_args())

@@ -151,7 +151,3 @@ def evaluate(
     print("\nResults saved")
 
     return results
-
-
-if __name__ == "__main__":
-    evaluate()
