@@ -14,8 +14,6 @@ class TextEncoder:
     def encode(self, text: str | list[str]) -> torch.Tensor:
         """
         Returns normalized embedding(s).
-        Single string → [384]
-        List of strings → [N, 384]
         """
         embeddings = self.model.encode(
             text,
