@@ -4,7 +4,6 @@ import mlflow
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from scipy.stats import spearmanr
 from torch.utils.data import DataLoader, Dataset, random_split
 
 IMAGE_DIM = 1280
@@ -17,7 +16,7 @@ class ProjectionMLP(nn.Module):
     """Simple 2-layer MLP with BatchNorm, GELU, and Dropout."""
 
     def __init__(
-        self, input_dim: int, hidden_dim: int, output_dim: int, dropout: float = 0.1
+        self, input_dim: int, hidden_dim: int, output_dim: int, dropout: float = 0.3
     ):
         super().__init__()
         self.net = nn.Sequential(
@@ -88,27 +87,23 @@ class AlignmentPairDataset(Dataset):
         self,
         image_vectors: torch.Tensor,
         text_vectors: torch.Tensor,
-        labels: torch.Tensor,
     ):
         self.image_vectors = image_vectors
         self.text_vectors = text_vectors
-        self.labels = labels
 
     def __len__(self):
-        return len(self.labels)
+        return len(self.image_vectors)
 
     def __getitem__(self, idx):
         return {
             "image_vector": self.image_vectors[idx],
             "text_vector": self.text_vectors[idx],
-            "label": self.labels[idx],
         }
 
 
 def train_alignment_head(
     image_vectors: torch.Tensor,
     text_vectors: torch.Tensor,
-    labels: torch.Tensor,
     epochs: int = 40,
     batch_size: int = 32,
     lr: float = 1e-3,
@@ -117,7 +112,7 @@ def train_alignment_head(
 ) -> AlignmentHead:
     """Train and return best AlignmentHead."""
 
-    dataset = AlignmentPairDataset(image_vectors, text_vectors, labels)
+    dataset = AlignmentPairDataset(image_vectors, text_vectors)
     n_val = max(int(0.2 * len(dataset)), 1)
     n_train = len(dataset) - n_val
 
@@ -135,7 +130,7 @@ def train_alignment_head(
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
-    best_score = -1.0
+    best_score = float("inf")
     best_state = None
 
     with mlflow.start_run(run_name="alignment_head_training"):
@@ -173,37 +168,39 @@ def train_alignment_head(
 
             # Validate
             model.eval()
-            all_scores, all_labels = [], []
+            val_loss = 0.0
             with torch.no_grad():
                 for batch in val_dl:
                     img = batch["image_vector"].to(device)
                     txt = batch["text_vector"].to(device)
 
                     out = model(img, txt)
+                    val_loss += criterion(out["logits_img"], out["logits_txt"]).item()
 
-                    all_scores.extend(out["scores"].cpu().tolist())
-                    all_labels.extend(batch["label"].tolist())
-
-            val_spearman, _ = spearmanr(all_scores, all_labels)
             avg_loss = epoch_loss / len(train_dl)
+            avg_val_loss = val_loss / len(val_dl)
 
             mlflow.log_metrics(
-                {"train_loss": avg_loss, "val_spearman": val_spearman}, step=epoch
+                {"train_loss": avg_loss, "val_loss": avg_val_loss}, step=epoch
             )
-            print(f"Epoch {epoch:02d} | loss={avg_loss:.4f} | ρ={val_spearman:.4f}")
+            print(
+                f"Epoch {epoch:02d} | train_loss={avg_loss:.4f} | val_loss={avg_val_loss:.4f}"
+            )
 
-            if val_spearman > best_score:
-                best_score = val_spearman
+            if avg_val_loss < best_score:
+                best_score = avg_val_loss
                 best_state = {k: v.clone() for k, v in model.state_dict().items()}
-                print(f" Best checkpoint (ρ={val_spearman:.4f})")
+                print(f" Best checkpoint (val_loss={avg_val_loss:.4f})")
+
+    if best_state is None:
+        raise RuntimeError("Training finished without producing a best checkpoint.")
 
     model.load_state_dict(best_state)
 
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     torch.save(model.state_dict(), save_path)
 
-    print(f"\nDone. Best Spearman ρ = {best_score:.4f}")
-    print("checkpoint saved! to: checkpoints/alignment_head.pt")
-    print("   Target: ρ > 0.55 (good)  |  ρ > 0.70 (excellent)")
+    print(f"\nDone. Best val_loss = {best_score:.4f}")
 
+    print("checkpoint saved! to: checkpoints/alignment_head.pt")
     return model
