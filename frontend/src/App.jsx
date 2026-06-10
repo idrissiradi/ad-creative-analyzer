@@ -3,7 +3,7 @@ import { useState } from 'react'
 import UploadZone from './components/UploadZone'
 import ResultsPanel from './components/ResultsPanel'
 
-const API_URL = import.meta.env.VITE_API_URL || '/analyze'
+const API_URL = import.meta.env.VITE_API_URL || '/api/analyze'
 
 export default function App() {
   const [result, setResult] = useState(null)

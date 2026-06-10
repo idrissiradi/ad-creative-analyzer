@@ -1,0 +1,18 @@
+{
+  "test_f1_content_type": 0.7048,
+  "test_f1_mood": 0.5984,
+  "target_content_type": 0.78,
+  "target_mood": 0.75,
+  "content_types": [
+    "Product Showcase",
+    "Lifestyle",
+    "Promotional"
+  ],
+  "moods": [
+    "Energetic",
+    "Calm",
+    "Professional",
+    "Playful"
+  ],
+  "checkpoint": "/content/drive/MyDrive/Colab Notebooks/ad-creative-analyzer/checkpoints/best_phase2.pt"
+}

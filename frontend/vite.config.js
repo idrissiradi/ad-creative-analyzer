@@ -9,6 +9,11 @@ export default defineConfig({
     port: 5173,
     proxy: {
       // Proxy API calls to FastAPI — no CORS issues in dev
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
       '/analyze': 'http://localhost:8000',
       '/health': 'http://localhost:8000',
     },

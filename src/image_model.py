@@ -9,10 +9,12 @@ class AdImageModel(nn.Module):
         num_content_types: int = 3,
         num_moods: int = 4,
         freeze_encoder: bool = True,
+        pretrained: bool = True,
     ):
         super().__init__()
 
-        self.backbone = efficientnet_b0(weights=EfficientNet_B0_Weights.IMAGENET1K_V1)
+        weights = EfficientNet_B0_Weights.IMAGENET1K_V1 if pretrained else None
+        self.backbone = efficientnet_b0(weights=weights)
 
         self.encoder = self.backbone.features
         in_features = 1280  # EfficientNet-B0's final feature dimension after avgpool
@@ -29,10 +31,13 @@ class AdImageModel(nn.Module):
         if freeze_encoder:
             self.freeze_encoder()
 
-    def forward(self, x):
+    def encode_image(self, x):
         features = self.encoder(x)
         features = self.backbone.avgpool(features)
-        features = torch.flatten(features, 1)
+        return torch.flatten(features, 1)
+
+    def forward(self, x):
+        features = self.encode_image(x)
 
         content_logits = self.head_content(features)
         mood_logits = self.head_mood(features)

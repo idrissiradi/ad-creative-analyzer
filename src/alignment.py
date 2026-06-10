@@ -16,7 +16,7 @@ THRESHOLD_LOW = 40
 class AlignmentResult:
     score: float  # 0–100
     label: str  # Aligned / Neutral / Mismatched
-    method: str  # "projection_head" or "missing_projection_head" (Great for debugging!)
+    method: str  # "projection_head" or "missing_projection_head"
 
 
 def load_head(checkpoint: str = DEFAULT_CHECKPOINT) -> AlignmentHead | None:
@@ -45,6 +45,11 @@ def compute_alignment(
         score = head.score(image_vector, text_vector)  # float [0, 100]
         method = "projection_head"
     else:
+        cos = F.cosine_similarity(
+            image_vector.flatten()[: text_vector.numel()].unsqueeze(0),
+            text_vector.flatten().unsqueeze(0),
+        ).item()
+        score = round((cos + 1) / 2 * 100, 1)
         method = "missing_projection_head"
 
     if score >= THRESHOLD_HIGH:
