@@ -52,14 +52,12 @@ class InferencePipeline:
         self.text_encoder = TextEncoder(device=DEVICE)
 
         alignment_exists = Path(alignment_checkpoint).exists()
-        print(
-            f"AlignmentHead: {'loaded' if alignment_exists else 'not trained yet — cosine fallback'}"
-        )
+        print(f"AlignmentHead: {'loaded' if alignment_exists else 'not trained yet'}")
 
         print("Loading Flan-T5...")
         self.caption_gen = CaptionGenerator(device=DEVICE)
         self.alignment_checkpoint = alignment_checkpoint
-        print("✓ Ready.")
+        print("Ready.")
 
     def analyze(self, image: Image.Image, caption: str, platform: str) -> dict:
         t0 = time.perf_counter()
@@ -110,4 +108,6 @@ class InferencePipeline:
             "Neutral": "L'image et le texte partagent une intention generale, mais le message peut etre renforce.",
             "Mismatched": "Le texte semble peu relie au signal visuel; une reformulation plus specifique aiderait.",
         }
-        return explanations.get(label, "Score calcule a partir de la similarite image-texte.")
+        return explanations.get(
+            label, "Score calcule a partir de la similarite image-texte."
+        )
