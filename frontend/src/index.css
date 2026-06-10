@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Syne", sans-serif;
+  --font-body: "Plus Jakarta Sans", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-navy-950: #06080f;
+  --color-navy-900: #0d1117;
+  --color-navy-800: #111827;
+  --color-navy-700: #1e2736;
+  --color-navy-600: #2d3a4f;
+
+  --color-sky: #38bdf8;
+  --color-sky-dark: #0ea5e9;
+
+  --color-ember: #fb923c;
+  --color-ember-dark: #ea580c;
+
+  --color-jade: #4ade80;
+  --color-jade-dark: #16a34a;
+
+  --color-amber: #facc15;
+  --color-amber-dark: #ca8a04;
+
+  --color-rose: #f87171;
+  --color-rose-dark: #dc2626;
+
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-fade-in: fadeIn 0.4s ease-out forwards;
+  --animate-slide-up: slideUp 0.5s ease-out forwards;
+}
+
+@layer base {
+  body {
+    margin: 0;
+    background: var(--color-navy-950);
+    color: var(--color-slate-200);
+    font-family: var(--font-body);
+  }
+}
+
+@layer components {
+  .label {
+    @apply font-mono text-xs font-medium uppercase tracking-widest text-slate-400;
+  }
+
+  .card {
+    @apply rounded-xl border border-navy-700 bg-navy-900/80 shadow-lg shadow-black/20;
+  }
+
+  .input-base {
+    @apply w-full rounded-xl border border-navy-700 bg-navy-900 px-4 py-3 text-sm leading-relaxed text-slate-100 placeholder:text-slate-500 outline-none transition-colors duration-150 focus:border-sky focus:ring-2 focus:ring-sky/20;
+  }
+
+  .btn-primary {
+    @apply rounded-xl bg-sky px-4 py-3 font-display text-sm font-bold text-navy-950 transition-colors duration-150 hover:bg-sky-dark disabled:cursor-not-allowed disabled:bg-navy-700 disabled:text-slate-400;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
