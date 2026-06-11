@@ -1,4 +1,3 @@
-// App.jsx — interface VisioMark
 import { useState } from 'react'
 import UploadZone from './components/UploadZone'
 import ResultsPanel from './components/ResultsPanel'

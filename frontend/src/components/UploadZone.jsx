@@ -1,12 +1,11 @@
-// UploadZone.jsx — panneau d'image, de texte et de plateforme
 import { useRef, useState } from 'react'
 
 const PLATFORMS = ['LinkedIn', 'Instagram', 'Facebook', 'Twitter', 'TikTok']
 
 export default function UploadZone({ onSubmit, loading }) {
-  const [image, setImage]       = useState(null)
-  const [preview, setPreview]   = useState(null)
-  const [caption, setCaption]   = useState('')
+  const [image, setImage] = useState(null)
+  const [preview, setPreview] = useState(null)
+  const [caption, setCaption] = useState('')
   const [platform, setPlatform] = useState('LinkedIn')
   const [dragging, setDragging] = useState(false)
   const fileRef = useRef()

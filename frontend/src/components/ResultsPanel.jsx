@@ -1,17 +1,14 @@
-// ResultsPanel.jsx — affiche les sorties de l'analyse
 import AlignmentGauge from './AlignmentGauge'
 
 const CONTENT_ICONS = {
   'Product Showcase': '📦',
   'Lifestyle': '🌄',
-  'Testimonial': '💬',
   'Promotional': '🏷️',
 }
 
 const CONTENT_LABELS = {
   'Product Showcase': 'Présentation produit',
   'Lifestyle': 'Style de vie',
-  'Testimonial': 'Témoignage',
   'Promotional': 'Promotionnel',
 }
 

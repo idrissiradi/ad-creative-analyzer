@@ -45,12 +45,7 @@ def compute_alignment(
         score = head.score(image_vector, text_vector)  # float [0, 100]
         method = "projection_head"
     else:
-        cos = F.cosine_similarity(
-            image_vector.flatten()[: text_vector.numel()].unsqueeze(0),
-            text_vector.flatten().unsqueeze(0),
-        ).item()
-        score = round((cos + 1) / 2 * 100, 1)
-        method = "missing_projection_head"
+        raise RuntimeError(f"Alignment head checkpoint not found at '{checkpoint}' ")
 
     if score >= THRESHOLD_HIGH:
         label = "Aligned"

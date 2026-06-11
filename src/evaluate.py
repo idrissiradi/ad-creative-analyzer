@@ -80,6 +80,38 @@ def evaluate(
     print(f"Mood F1         : {mood_score:.4f}")
     print(f"Average F1      : {(content_score + mood_score) / 2:.4f}")
 
+    f1_ct_per_class = MulticlassF1Score(num_classes=NUM_CONTENT, average="none").to(
+        DEVICE
+    )
+
+    f1_mood_per_class = MulticlassF1Score(num_classes=NUM_MOODS, average="none").to(
+        DEVICE
+    )
+
+    f1_ct_per_class.update(
+        torch.tensor(all_content_pred, device=DEVICE),
+        torch.tensor(all_content_true, device=DEVICE),
+    )
+
+    f1_mood_per_class.update(
+        torch.tensor(all_mood_pred, device=DEVICE),
+        torch.tensor(all_mood_true, device=DEVICE),
+    )
+
+    ct_per_class = f1_ct_per_class.compute().cpu().tolist()
+
+    mood_per_class = f1_mood_per_class.compute().cpu().tolist()
+
+    print("\nPer-class F1 (content_type):")
+
+    for name, score in zip(CONTENT_TYPES, ct_per_class):
+        print(f"  {name:<20s} {score:.4f}")
+
+    print("\nPer-class F1 (mood):")
+
+    for name, score in zip(MOODS, mood_per_class):
+        print(f"  {name:<20s} {score:.4f}")
+
     print("\nConfusion Matrices")
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     os.makedirs("eval", exist_ok=True)

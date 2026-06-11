@@ -1,4 +1,3 @@
-// AlignmentGauge.jsx — jauge SVG semi-circulaire pour le score d'alignement 0-100
 export default function AlignmentGauge({ score, label }) {
   const r = 54
   const cx = 70, cy = 70
@@ -6,18 +5,18 @@ export default function AlignmentGauge({ score, label }) {
   const filled = (score / 100) * circumference
 
   const color =
-    label === 'Aligned'    ? '#4ADE80' :
-    label === 'Mismatched' ? '#F87171' : '#FACC15'
+    label === 'Aligned' ? '#4ADE80' :
+      label === 'Mismatched' ? '#F87171' : '#FACC15'
 
   const labelColor =
-    label === 'Aligned'    ? 'text-jade' :
-    label === 'Mismatched' ? 'text-rose' : 'text-amber'
+    label === 'Aligned' ? 'text-jade' :
+      label === 'Mismatched' ? 'text-rose' : 'text-amber'
 
   const displayLabel =
-    label === 'Aligned'    ? 'Aligné' :
-    label === 'Mismatched' ? 'Incohérent' :
-    label === 'Partial'    ? 'Partiel' :
-    label
+    label === 'Aligned' ? 'Aligné' :
+      label === 'Mismatched' ? 'Incohérent' :
+        label === 'Partial' ? 'Partiel' :
+          label
 
   return (
     <div className="flex flex-col items-center gap-2">

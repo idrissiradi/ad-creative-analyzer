@@ -14,5 +14,5 @@
     "Professional",
     "Playful"
   ],
-  "checkpoint": "/content/drive/MyDrive/Colab Notebooks/ad-creative-analyzer/checkpoints/best_phase2.pt"
+  "checkpoint": "/checkpoints/best_phase2.pt"
 }

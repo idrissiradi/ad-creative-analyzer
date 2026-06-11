@@ -1,11 +1,10 @@
 [project]
 name = "visual-content-classifier"
 version = "0.1.0"
-description = "Add your description here"
+description = "Multimodal AI system that analyzes ad image-caption alignment and generates platform-specific copy."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "albumentations>=2.0.8",
     "fastapi[standard]>=0.136.1",
     "fiftyone>=1.16.0",
     "mlflow>=3.13.0",
@@ -14,12 +13,10 @@ dependencies = [
     "pillow>=12.2.0",
     "python-dotenv>=1.2.2",
     "python-multipart>=0.0.28",
-    "requests>=2.32.5",
     "scikit-learn>=1.8.0",
     "sentence-transformers>=5.5.1",
     "torch",
     "torchmetrics>=1.9.0",
     "torchvision",
     "transformers>=5.9.0",
-    "vadersentiment>=3.3.2",
 ]
