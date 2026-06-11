@@ -1,6 +1,6 @@
 {
-  "test_f1_content_type": 0.7048,
-  "test_f1_mood": 0.5984,
+  "test_f1_content_type": 0.7097,
+  "test_f1_mood": 0.6156,
   "target_content_type": 0.78,
   "target_mood": 0.75,
   "content_types": [
